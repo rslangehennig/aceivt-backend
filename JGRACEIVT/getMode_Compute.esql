@@ -1,0 +1,47 @@
+
+
+CREATE COMPUTE MODULE getMode_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		CALL CopyMessageHeaders();
+		-- CALL CopyEntireMessage();
+		CALL CalculatePrimeNumbers();
+	    SET OutputRoot.JSON.Data.code = 'CP4I0055';
+	    SET OutputRoot.JSON.Data.msg = 'Request has been processed by ESQL Compute Node.';
+	    SET OutputRoot.JSON.Data.time = CURRENT_TIMESTAMP;
+		RETURN TRUE;
+	END;
+
+	CREATE PROCEDURE CopyMessageHeaders() BEGIN
+		DECLARE I INTEGER 1;
+		DECLARE J INTEGER;
+		SET J = CARDINALITY(InputRoot.*[]);
+		WHILE I < J DO
+			SET OutputRoot.*[I] = InputRoot.*[I];
+			SET I = I + 1;
+		END WHILE;
+	END;
+
+	CREATE PROCEDURE CopyEntireMessage() BEGIN
+		SET OutputRoot = InputRoot;
+	END;
+	
+	CREATE PROCEDURE CalculatePrimeNumbers() BEGIN
+		DECLARE I INTEGER;
+		DECLARE N INTEGER 1;
+		DECLARE P INTEGER 0;
+		X: WHILE N <= 3000 DO
+			SET I = 2;
+			Y: WHILE I <= N DO
+				IF MOD(N, I) = 0 THEN
+					LEAVE Y;
+				END IF;
+				SET I = I + 1;
+			END WHILE Y;
+			IF I = N THEN
+				SET P = P + 1;
+			END IF;
+			SET N = N + 1;
+		END WHILE X;
+	END;
+END MODULE;
