@@ -1,0 +1,15 @@
+Requirements
+
+In order to perform a local build of the BAR on a Linux target, you must:
+
+1. Download the toolkit from https://www.ibm.com/docs/en/app-connect/12.0?topic=enterprise-download-ace-developer-edition-get-started
+
+   I downloaded 12.0.7.0-ACE-LINUX64-DEVELOPER.tar.gz
+
+2. Follow the instructions provided for installation
+
+   I unziped this file under /downloads/ace-developer which resulted in a file structure that looks like:
+
+   /downloads/ace-developer/ace-12.0.7.0/server/bin
+
+To perform the build, you will run the 'ibmint' command that is found in the bin directory above.
