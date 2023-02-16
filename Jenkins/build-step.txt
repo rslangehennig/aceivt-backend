@@ -1,4 +1,6 @@
-I created a freestyle project and installed the UCD publisher plugin and a plugin that allowed me to update the build number.
+I created a freestyle project and installed the UCD publisher plugin and the 'Build Name and Description Setter' plugin that allowed me to update the build number.
+
+Here is the build step:
 
 #!/bin/bash
 pwd
