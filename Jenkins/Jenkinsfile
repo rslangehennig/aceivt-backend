@@ -1,10 +1,11 @@
 node {
     //URL to Github repository https://github.com/<owner>/<repo>
-    def GITHUB_REPO_URL="https://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@github.com/rslangehennig/Online-Botanicals"
+    //def GITHUB_REPO_URL="https://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@github.com/rslangehennig/Online-Botanicals"
+    def GITHUB_REPO_URL="https://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@github.com/rslangehennig/aceivt-backend"
     //Retrieve ENV ID values for DEV and QA from "Download attributes from API" json file
-    def VELOCITY_ENV_ID_DEV="a4a91beb-e2be-4da5-896a-78632d3b451c"
+    //def VELOCITY_ENV_ID_DEV="a4a91beb-e2be-4da5-896a-78632d3b451c"
     //VELOCITY_APP_NAME must match your Velocity pipeline application name
-    def VELOCITY_APP_NAME="Online-Botanicals"
+    //def VELOCITY_APP_NAME="Online-Botanicals"
     //Version number 
     def VERSION_NUMBER="2.0"
     //Do not change below this line.
@@ -37,9 +38,10 @@ node {
                CURRENT_BUILD="2.0.${BUILD_NUMBER}"
                # Create new component version
                echo "Create new component version"
-               udclient/udclient -weburl $UCD_WEB_URL -authtoken $UCD_AUTH_TOKEN createVersion -component Online-Botanical-APP -name $CURRENT_BUILD
-               udclient/udclient -weburl $UCD_WEB_URL -authtoken $UCD_AUTH_TOKEN addVersionLink -component Online-Botanical-APP -version $CURRENT_BUILD -linkName "Jenkins Pipeline" -link http://67.228.223.183:8080/job/Online%20Botanical/job/Online-Botanical-Build-Pipeline/${BUILD_NUMBER}/
-               udclient/udclient -weburl $UCD_WEB_URL -authtoken $UCD_AUTH_TOKEN addVersionFiles -component Online-Botanical-APP -version $CURRENT_BUILD -base "/root/.jenkins/workspace/Online Botanical/Online-Botanical-Build-Pipeline/output2"
+               /opt/IBM/udclient/udclient -weburl $UCD_WEB_URL -authtoken $UCD_AUTH_TOKEN createVersion -component CP4I-ACEIVT-BAR -name $CURRENT_BUILD
+               /opt/IBM/udclient/udclient -weburl $UCD_WEB_URL -authtoken $UCD_AUTH_TOKEN addVersionLink -component CP4I-ACEIVT-BAR -version $CURRENT_BUILD -linkName "Jenkins Pipeline" -link http://52.116.6.138:8081/job/ace-ivt-backend/${BUILD_NUMBER}/
+               /opt/IBM/udclient/udclient -weburl $UCD_WEB_URL -authtoken $UCD_AUTH_TOKEN addVersionFiles -component CP4I-ACEIVT-BAR -version $CURRENT_BUILD -base "/opt/jenkins_agent/workspace/ace-ivt-backend/"
+
                # Add a component status to allow it to pass gates in UCD
                #echo "Adding component status"
                #udclient/udclient -weburl $UCD_WEB_URL -authtoken $UCD_AUTH_TOKEN addVersionStatus -component Online-Botanical-APP -version $CURRENT_BUILD -status "Unit Tests Passed"
