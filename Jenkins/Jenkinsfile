@@ -38,6 +38,9 @@ node {
             # Start with a clean setup - could put the work directory anywhere
             rm -rf /tmp/ace-server junit-reports
 
+            #source '/downloads/ace-developer/ace-12.0.7.0/server/bin/mqsiprofile'
+            source '/opt/ace-12.0.7.0/server/bin/mqsiprofile'
+
             # Create work directory and deploy the application BAR file
             mqsicreateworkdir /tmp/ace-server
             ibmint deploy --input-bar-file jgr-cp4i-aceivt.bar --output-work-directory /tmp/ace-server
