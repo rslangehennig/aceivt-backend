@@ -29,13 +29,13 @@ node {
         #source '/downloads/ace-developer/ace-12.0.7.0/server/bin/mqsiprofile'
         source '/opt/ace-12.0.7.0/server/bin/mqsiprofile'
         #ibmint package --input-path . --output-bar aceivt.bar --project JGRACEIVT
-        ibmint package --input-path . --output-bar jgr-cp4i-aceivt.bar'''
+        ibmint package --input-path . --output-bar jgr-cp4i-aceivt.bar --project JGRACEIVT'''
     }
 
     stage('UnitTest') {
       try {
         sh '''#!/bin/bash
-            # Start with a clean setup - could put the work directory anywhere
+            # Start with a clean setup - could put the work directory anywhere but /tmp is good enough for now.
             rm -rf /tmp/ace-server junit-reports
 
             #source '/downloads/ace-developer/ace-12.0.7.0/server/bin/mqsiprofile'
@@ -48,7 +48,7 @@ node {
             # Compile and deploy the unit tests for the application
             ibmint deploy --input-path . --output-work-directory /tmp/ace-server --project JGRACEIVT_UnitTest
 
-            # Optimize the server to speed things up and then run the tests
+            # Optimize the server to speed things up, and then run the tests
             ibmint optimize server --work-dir /tmp/ace-server --disable NodeJS
             IntegrationServer -w /tmp/ace-server --test-project JGRACEIVT_UnitTest --test-junit-options --reports-dir=junit-reports
             '''
