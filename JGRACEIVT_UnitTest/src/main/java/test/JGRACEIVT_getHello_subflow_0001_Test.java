@@ -73,7 +73,7 @@ public class JGRACEIVT_getHello_subflow_0001_Test {
 		TestMessageAssembly actualMessageAssembly =  nodeSpy.propagatedMessageAssembly("Output", 1);
 
 		// Assert output message body data
-		assertEquals("CP4I0077___", actualMessageAssembly.messagePath("JSON.Data.code").getStringValue());
+		assertEquals("CP4I0077", actualMessageAssembly.messagePath("JSON.Data.code").getStringValue());
 	}
 
 }
