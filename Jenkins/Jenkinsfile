@@ -33,7 +33,7 @@ node {
     }
 
     stage('UnitTest') {
-      steps {
+      try {
         sh '''#!/bin/bash
             # Start with a clean setup - could put the work directory anywhere
             rm -rf /tmp/ace-server junit-reports
@@ -49,11 +49,10 @@ node {
             ibmint optimize server --work-dir /tmp/ace-server --disable NodeJS
             IntegrationServer -w /tmp/ace-server --test-project JGRACEIVT_UnitTest --test-junit-options --reports-dir=junit-reports
             '''
-      }
-      post {
-        always {
+      } 
+      finally
+      {
             junit '**/junit-reports/TEST*.xml'
-        }
       }
     }
 
