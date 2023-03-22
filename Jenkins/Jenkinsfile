@@ -1,7 +1,8 @@
 node {
     //URL to Github repository https://github.com/<owner>/<repo>
-    //def GITHUB_REPO_URL="https://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@github.com/rslangehennig/Online-Botanicals"
-    def GITHUB_REPO_URL="https://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@github.com/rslangehennig/aceivt-backend"
+    //def GITHUB_REPO_URL="https://github.com/rslangehennig/Online-Botanicals"
+    //def GITHUB_REPO_URL="https://github.com/rslangehennig/aceivt-backend"
+    def GITHUB_REPO_URL="https://github.com/trevor-dolby-at-ibm-com/aceivt-backend"
     //Retrieve ENV ID values for DEV and QA from "Download attributes from API" json file
     //def VELOCITY_ENV_ID_DEV="a4a91beb-e2be-4da5-896a-78632d3b451c"
     //VELOCITY_APP_NAME must match your Velocity pipeline application name
@@ -25,9 +26,35 @@ node {
         echo $WORKSPACE
         pwd
         ls -al
-        source '/downloads/ace-developer/ace-12.0.7.0/server/bin/mqsiprofile'
+        #source '/downloads/ace-developer/ace-12.0.7.0/server/bin/mqsiprofile'
+        source '/opt/ace-12.0.7.0/server/bin/mqsiprofile'
         #ibmint package --input-path . --output-bar aceivt.bar --project JGRACEIVT
         ibmint package --input-path . --output-bar jgr-cp4i-aceivt.bar'''
+    }
+
+    stage('UnitTest') {
+      steps {
+        sh '''#!/bin/bash
+            # Start with a clean setup - could put the work directory anywhere
+            rm -rf /tmp/ace-server junit-reports
+
+            # Create work directory and deploy the application BAR file
+            mqsicreateworkdir /tmp/ace-server
+            ibmint deploy --input-bar-file jgr-cp4i-aceivt.bar --output-work-directory /tmp/ace-server
+
+            # Compile and deploy the unit tests for the application
+            ibmint deploy --input-path . --output-work-directory /tmp/ace-server --project JGRACEIVT_UnitTest
+
+            # Optimize the server to speed things up and then run the tests
+            ibmint optimize server --work-dir /tmp/ace-server --disable NodeJS
+            IntegrationServer -w /tmp/ace-server --test-project JGRACEIVT_UnitTest --test-junit-options --reports-dir=junit-reports
+            '''
+      }
+      post {
+        always {
+            junit '**/junit-reports/TEST*.xml'
+        }
+      }
     }
 
     stage ('Push Artifact of Build to UCD') {
