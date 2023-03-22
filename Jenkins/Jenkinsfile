@@ -33,10 +33,9 @@ node {
     }
 
     stage('UnitTest') {
-      try {
         sh '''#!/bin/bash
             # Start with a clean setup - could put the work directory anywhere but /tmp is good enough for now.
-            rm -rf /tmp/ace-server junit-reports
+            rm -rf /tmp/ace-server
 
             #source '/downloads/ace-developer/ace-12.0.7.0/server/bin/mqsiprofile'
             source '/opt/ace-12.0.7.0/server/bin/mqsiprofile'
@@ -49,13 +48,10 @@ node {
             ibmint deploy --input-path . --output-work-directory /tmp/ace-server --project JGRACEIVT_UnitTest
 
             # Run the tests; could optimize first if needed
-            IntegrationServer -w /tmp/ace-server --test-project JGRACEIVT_UnitTest --test-junit-options --reports-dir=junit-reports
+            IntegrationServer -w /tmp/ace-server --test-project JGRACEIVT_UnitTest
+
+            # Could report the JUnit tests results to Jenkins if needed
             '''
-      } 
-      finally
-      {
-            junit '**/junit-reports/TEST*.xml'
-      }
     }
 
     stage ('Push Artifact of Build to UCD') {
