@@ -43,7 +43,7 @@ node {
 
             # Create work directory and deploy the application BAR file
             mqsicreateworkdir /tmp/ace-server
-            ibmint deploy --input-bar-file jgr-cp4i-aceivt.bar --output-work-directory /tmp/ace-server
+            ibmint deploy --input-bar-file jgr-cp4i-aceivt.bar --output-work-directory /tmp/ace-server --compile-maps-and-schemas
 
             # Compile and deploy the unit tests for the application
             ibmint deploy --input-path . --output-work-directory /tmp/ace-server --project JGRACEIVT_UnitTest
