@@ -81,8 +81,8 @@ node {
                /opt/IBM/udclient/udclient -weburl $UCD_WEB_URL -authtoken $UCD_AUTH_TOKEN addVersionFiles -component CP4I-ACEIVT-BAR -version $CURRENT_BUILD -base "/opt/jenkins-agent/workspace/ace-ivt-pipelines/ace-ivt-backend-pipeline"
 
                # Add a component status to allow it to pass gates in UCD
-               #echo "Adding component status"
-               #udclient/udclient -weburl $UCD_WEB_URL -authtoken $UCD_AUTH_TOKEN addVersionStatus -component Online-Botanical-APP -version $CURRENT_BUILD -status "Unit Tests Passed"
+               echo "Adding component status"
+               /opt/IBM/udclient/udclient -weburl $UCD_WEB_URL -authtoken $UCD_AUTH_TOKEN addVersionStatus -component CP4I-ACEIVT-BAR -version $CURRENT_BUILD -status "Unit Tests Passed"
 
                # Create snapshot
                #echo "Create new snapshot"
