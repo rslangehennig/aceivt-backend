@@ -1,0 +1,109 @@
+node {
+    //URL to Github repository https://github.com/<owner>/<repo>
+    //def GITHUB_REPO_URL="https://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@github.com/rslangehennig/Online-Botanicals"
+    def GITHUB_REPO_URL="https://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@github.com/rslangehennig/aceivt-backend"
+    //Retrieve ENV ID values for DEV and QA from "Download attributes from API" json file
+    def VELOCITY_ENV_ID_DEV="9629143e-d320-4e38-8c5b-fef57d4cc528"
+    //VELOCITY_APP_NAME must match your Velocity pipeline application name
+    def VELOCITY_APP_NAME="ace-ivt-backend-pipeline"
+    //Version number
+    def VERSION_NUMBER="3.0"
+    //Do not change below this line.
+    def GIT_COMMIT
+
+    stage ('cloning the repository'){
+        currentBuild.displayName = "${VERSION_NUMBER}.${BUILD_NUMBER}"
+        echo currentBuild.displayName = "${currentBuild.displayName}"
+        majorVersion="${BUILD_NUMBER}"
+        def scm = git branch: 'main', url: "${GITHUB_REPO_URL}"
+        GIT_COMMIT = sh(returnStdout: true, script: "git rev-parse HEAD").trim()
+        echo "GIT_COMMIT=${GIT_COMMIT}"
+    }
+
+    stage ('build') {
+        sh '''#!/bin/bash
+        echo $WORKSPACE
+        pwd
+        ls -al
+        source '/downloads/ace-developer/ace-12.0.7.0/server/bin/mqsiprofile'
+        #ibmint package --input-path . --output-bar aceivt.bar --project JGRACEIVT
+        ibmint package --input-path . --output-bar jgr-cp4i-aceivt.bar'''
+    }
+    
+    stage('UnitTest') {
+        sh '''#!/bin/bash
+            # Start with a clean setup - could put the work directory anywhere but /tmp is good enough for now.
+            rm -rf /tmp/ace-server
+            source '/downloads/ace-developer/ace-12.0.7.0/server/bin/mqsiprofile'
+            # Create work directory and deploy the application BAR file
+            mqsicreateworkdir /tmp/ace-server
+            ibmint deploy --input-bar-file jgr-cp4i-aceivt.bar --output-work-directory /tmp/ace-server
+            # Compile and deploy the unit tests for the application
+            ibmint deploy --input-path . --output-work-directory /tmp/ace-server --project JGRACEIVT_UnitTest
+            # Run the tests; could optimize first if needed
+            IntegrationServer -w /tmp/ace-server --test-project JGRACEIVT_UnitTest
+            # Could report the JUnit tests results to Jenkins if needed
+            '''
+    }
+    
+    stage ('Send metrics to UCV') {
+        sh '''#!/bin/bash
+        echo $BUILD_NUMBER
+        echo $GIT_COMMIT
+        pwd
+
+        echo "perform curl"
+        curl -k -X POST 'https://velocity2.ibmdevops.com/api/v1/builds/apiDriven' \
+            -H 'Authorization: UserAccessKey 809845e6-ef8f-4b5b-9329-1ac4a17a3f4d' \
+            -H 'Content-Type: application/json' \
+            -d \
+            '{
+                "version":"3.0.'"${BUILD_NUMBER}"'",
+                "application":{"externalId":"82e074bd-12c9-42fa-96ff-1267369e700b"},
+                "url":"http://52.116.6.138:8081/job/Ace-Capital/job/acecapital-backend-pipeline/'"${BUILD_NUMBER}"'/",
+                "revision":"'"${GIT_COMMIT}"'"
+            }'
+           '''
+    }
+
+    stage ('Push Artifact of Build to UCD') {
+         sh '''export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/
+               export UCD_AUTH_TOKEN="9ec486c6-c7bc-4040-ac1d-f6b6b3e040c7"
+               export UCD_WEB_URL="https://169.62.212.57:8444"
+
+               echo $BUILD_NUMBER
+               CURRENT_BUILD="3.0.${BUILD_NUMBER}"
+               
+               # Cleanup unnecessary files so they are not in component version
+               pwd
+               ls -al
+
+               rm -f README.md
+               rm -rf .git
+               rm -rf Jenkins
+               rm -rf JGRACEIVT*
+
+               pwd
+               ls -al
+               
+               #
+               # Create new component version
+               #
+               echo "Create new component version"
+               /opt/IBM/udclient/udclient -weburl $UCD_WEB_URL -authtoken $UCD_AUTH_TOKEN createVersion -component AceCapital-Core-BAR -name $CURRENT_BUILD
+               /opt/IBM/udclient/udclient -weburl $UCD_WEB_URL -authtoken $UCD_AUTH_TOKEN addVersionLink -component AceCapital-Core-BAR -version $CURRENT_BUILD -linkName "Jenkins Pipeline" -link "http://52.116.6.138:8081/job/Ace-Capital/job/acecapital-backend-pipeline/"${BUILD_NUMBER}"/"
+               /opt/IBM/udclient/udclient -weburl $UCD_WEB_URL -authtoken $UCD_AUTH_TOKEN addVersionFiles -component AceCapital-Core-BAR -version $CURRENT_BUILD -base "/opt/jenkins-agent/workspace/ace-ivt-pipelines/ace-ivt-backend-pipeline"
+
+               # Add a component status to allow it to pass gates in UCD
+               #echo "Adding component status"
+               #udclient/udclient -weburl $UCD_WEB_URL -authtoken $UCD_AUTH_TOKEN addVersionStatus -component Online-Botanical-APP -version $CURRENT_BUILD -status "Unit Tests Passed"
+
+               # Create snapshot
+               #echo "Create new snapshot"
+               #cp urbancode/snapshot.json .
+               #sed -i "s/MYNAME/$CURRENT_BUILD/g" snapshot.json
+               #cat snapshot.json
+               #udclient/udclient -weburl $UCD_WEB_URL -authtoken $UCD_AUTH_TOKEN createSnapshot snapshot.json
+               '''
+    }
+}
